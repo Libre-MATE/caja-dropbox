@@ -1,5 +1,6 @@
-# Initialization
+AC_PREREQ(2.60)
 
+# Initialization
 AC_INIT([caja-dropbox], [1.26.0], [https://github.com/Libre-MATE/caja-dropbox])
 
 AM_INIT_AUTOMAKE([1.9 tar-ustar dist-xz foreign no-dist-gzip])
@@ -27,7 +28,7 @@ GLIB_REQUIRED=2.50.0
 
 # Used programs
 AC_PROG_CC
-AM_PROG_LIBTOOL
+LT_INIT
 
 # Check for pkg-config
 PKG_PROG_PKG_CONFIG
