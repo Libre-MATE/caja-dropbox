@@ -1,13 +1,11 @@
 # Initialization
 AC_INIT([caja-dropbox], [1.26.0], [https://github.com/Libre-MATE/caja-dropbox])
 AC_PREREQ(2.60)
-
+AC_COPYRIGHT([Copyright (C) 2022 Libre MATE])
 AM_INIT_AUTOMAKE([1.9 tar-ustar dist-xz foreign no-dist-gzip])
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
-
 AC_CONFIG_MACRO_DIR([m4])
 AC_PREFIX_DEFAULT(/usr)
-
 AC_CONFIG_HEADERS(config.h)
 
 MATE_COMPILE_WARNINGS
