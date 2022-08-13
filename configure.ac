@@ -1,7 +1,6 @@
-AC_PREREQ(2.60)
-
 # Initialization
 AC_INIT([caja-dropbox], [1.26.0], [https://github.com/Libre-MATE/caja-dropbox])
+AC_PREREQ(2.60)
 
 AM_INIT_AUTOMAKE([1.9 tar-ustar dist-xz foreign no-dist-gzip])
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
