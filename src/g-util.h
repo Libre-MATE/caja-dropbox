@@ -31,16 +31,38 @@ G_BEGIN_DECLS
 
 #ifdef ND_DEBUG
 
-#define debug_enter() {g_print("Entering "); g_print(__FUNCTION__); g_printf("\n");}
-#define debug(format, ...) {g_print(__FUNCTION__); g_print(": "); \
-    g_printf(format, ## __VA_ARGS__); g_print("\n");}
-#define debug_return(v) {g_print("Exiting "); g_print(__FUNCTION__); g_printf("\n"); return v;}
+#define debug_enter()      \
+  {                        \
+    g_print("Entering ");  \
+    g_print(__FUNCTION__); \
+    g_printf("\n");        \
+  }
+#define debug(format, ...)           \
+  {                                  \
+    g_print(__FUNCTION__);           \
+    g_print(": ");                   \
+    g_printf(format, ##__VA_ARGS__); \
+    g_print("\n");                   \
+  }
+#define debug_return(v)    \
+  {                        \
+    g_print("Exiting ");   \
+    g_print(__FUNCTION__); \
+    g_printf("\n");        \
+    return v;              \
+  }
 
 #else
 
-#define debug_enter() do {} while(0)
-#define debug(format, ...) do {} while(0)
-#define debug_return(v) do {} while(0)
+#define debug_enter() \
+  do {                \
+  } while (0)
+#define debug(format, ...) \
+  do {                     \
+  } while (0)
+#define debug_return(v) \
+  do {                  \
+  } while (0)
 
 #endif
 

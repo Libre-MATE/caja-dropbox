@@ -2,7 +2,8 @@
  * Copyright 2008 Evenflow, Inc.
  *
  * dropbox-client.c
- * Implements connection handling and C interface for interfacing with the Dropbox daemon.
+ * Implements connection handling and C interface for interfacing with the
+ * Dropbox daemon.
  *
  * This file is part of caja-dropbox.
  *
@@ -21,15 +22,15 @@
  *
  */
 
-#include <glib.h>
-
-#include "g-util.h"
-#include "dropbox-command-client.h"
-#include "caja-dropbox-hooks.h"
 #include "dropbox-client.h"
 
-static void
-hook_on_connect(DropboxClient *dc) {
+#include <glib.h>
+
+#include "caja-dropbox-hooks.h"
+#include "dropbox-command-client.h"
+#include "g-util.h"
+
+static void hook_on_connect(DropboxClient *dc) {
   dc->hook_connect_called = TRUE;
 
   if (dc->command_connect_called) {
@@ -40,8 +41,7 @@ hook_on_connect(DropboxClient *dc) {
   }
 }
 
-static void
-command_on_connect(DropboxClient *dc) {
+static void command_on_connect(DropboxClient *dc) {
   dc->command_connect_called = TRUE;
 
   if (dc->hook_connect_called) {
@@ -52,8 +52,7 @@ command_on_connect(DropboxClient *dc) {
   }
 }
 
-static void
-command_on_disconnect(DropboxClient *dc) {
+static void command_on_disconnect(DropboxClient *dc) {
   dc->command_disconnect_called = TRUE;
 
   if (dc->hook_disconnect_called) {
@@ -61,14 +60,12 @@ command_on_disconnect(DropboxClient *dc) {
     g_hook_list_invoke(&(dc->ondisconnect_hooklist), FALSE);
     /* reset flags */
     dc->hook_disconnect_called = dc->command_disconnect_called = FALSE;
-  }
-  else {
+  } else {
     caja_dropbox_hooks_force_reconnect(&(dc->hookserv));
   }
 }
 
-static void
-hook_on_disconnect(DropboxClient *dc) {
+static void hook_on_disconnect(DropboxClient *dc) {
   dc->hook_disconnect_called = TRUE;
 
   if (dc->command_disconnect_called) {
@@ -76,20 +73,17 @@ hook_on_disconnect(DropboxClient *dc) {
     g_hook_list_invoke(&(dc->ondisconnect_hooklist), FALSE);
     /* reset flags */
     dc->hook_disconnect_called = dc->command_disconnect_called = FALSE;
-  }
-  else {
+  } else {
     dropbox_command_client_force_reconnect(&(dc->dcc));
   }
 }
 
-gboolean
-dropbox_client_is_connected(DropboxClient *dc) {
+gboolean dropbox_client_is_connected(DropboxClient *dc) {
   return (dropbox_command_client_is_connected(&(dc->dcc)) &&
-	  caja_dropbox_hooks_is_connected(&(dc->hookserv)));
+          caja_dropbox_hooks_is_connected(&(dc->hookserv)));
 }
 
-void
-dropbox_client_force_reconnect(DropboxClient *dc) {
+void dropbox_client_force_reconnect(DropboxClient *dc) {
   if (dropbox_client_is_connected(dc) == TRUE) {
     debug("forcing client to reconnect");
     dropbox_command_client_force_reconnect(&(dc->dcc));
@@ -98,8 +92,7 @@ dropbox_client_force_reconnect(DropboxClient *dc) {
 }
 
 /* should only be called once on initialization */
-void
-dropbox_client_setup(DropboxClient *dc) {
+void dropbox_client_setup(DropboxClient *dc) {
   caja_dropbox_hooks_setup(&(dc->hookserv));
   dropbox_command_client_setup(&(dc->dcc));
 
@@ -109,28 +102,23 @@ dropbox_client_setup(DropboxClient *dc) {
   dc->hook_disconnect_called = dc->command_disconnect_called = FALSE;
   dc->hook_connect_called = dc->command_connect_called = FALSE;
 
-  caja_dropbox_hooks_add_on_connect_hook(&(dc->hookserv),
-					     (DropboxHookClientConnectHook)
-					     hook_on_connect, dc);
+  caja_dropbox_hooks_add_on_connect_hook(
+      &(dc->hookserv), (DropboxHookClientConnectHook)hook_on_connect, dc);
 
-  dropbox_command_client_add_on_connect_hook(&(dc->dcc),
-					     (DropboxCommandClientConnectHook)
-					     command_on_connect, dc);
+  dropbox_command_client_add_on_connect_hook(
+      &(dc->dcc), (DropboxCommandClientConnectHook)command_on_connect, dc);
 
-  caja_dropbox_hooks_add_on_disconnect_hook(&(dc->hookserv),
-						(DropboxHookClientConnectHook)
-						hook_on_disconnect, dc);
+  caja_dropbox_hooks_add_on_disconnect_hook(
+      &(dc->hookserv), (DropboxHookClientConnectHook)hook_on_disconnect, dc);
 
-  dropbox_command_client_add_on_disconnect_hook(&(dc->dcc),
-						(DropboxCommandClientConnectHook)
-						command_on_disconnect, dc);
+  dropbox_command_client_add_on_disconnect_hook(
+      &(dc->dcc), (DropboxCommandClientConnectHook)command_on_disconnect, dc);
 }
 
 /* not thread safe */
-void
-dropbox_client_add_on_disconnect_hook(DropboxClient *dc,
-				      DropboxClientConnectHook dhcch,
-				      gpointer ud) {
+void dropbox_client_add_on_disconnect_hook(DropboxClient *dc,
+                                           DropboxClientConnectHook dhcch,
+                                           gpointer ud) {
   GHook *newhook;
 
   newhook = g_hook_alloc(&(dc->ondisconnect_hooklist));
@@ -141,10 +129,9 @@ dropbox_client_add_on_disconnect_hook(DropboxClient *dc,
 }
 
 /* not thread safe */
-void
-dropbox_client_add_on_connect_hook(DropboxClient *dc,
-				   DropboxClientConnectHook dhcch,
-				   gpointer ud) {
+void dropbox_client_add_on_connect_hook(DropboxClient *dc,
+                                        DropboxClientConnectHook dhcch,
+                                        gpointer ud) {
   GHook *newhook;
 
   newhook = g_hook_alloc(&(dc->onconnect_hooklist));
@@ -155,19 +142,15 @@ dropbox_client_add_on_connect_hook(DropboxClient *dc,
 }
 
 /* not thread safe */
-void
-dropbox_client_add_connection_attempt_hook(DropboxClient *dc,
-					   DropboxClientConnectionAttemptHook dhcch,
-					   gpointer ud) {
+void dropbox_client_add_connection_attempt_hook(
+    DropboxClient *dc, DropboxClientConnectionAttemptHook dhcch, gpointer ud) {
   debug("shouldn't be here...");
 
-  dropbox_command_client_add_connection_attempt_hook(&(dc->dcc),
-						     dhcch, ud);
+  dropbox_command_client_add_connection_attempt_hook(&(dc->dcc), dhcch, ud);
 }
 
 /* should only be called once on initialization */
-void
-dropbox_client_start(DropboxClient *dc) {
+void dropbox_client_start(DropboxClient *dc) {
   debug("starting connections");
   caja_dropbox_hooks_start(&(dc->hookserv));
   dropbox_command_client_start(&(dc->dcc));

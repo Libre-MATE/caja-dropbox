@@ -25,8 +25,9 @@
 #define DROPBOX_CLIENT_H
 
 #include <glib.h>
-#include "dropbox-command-client.h"
+
 #include "caja-dropbox-hooks.h"
+#include "dropbox-command-client.h"
 
 G_BEGIN_DECLS
 
@@ -44,32 +45,24 @@ typedef struct {
 typedef void (*DropboxClientConnectionAttemptHook)(guint, gpointer);
 typedef GHookFunc DropboxClientConnectHook;
 
-void
-dropbox_client_setup(DropboxClient *dc);
+void dropbox_client_setup(DropboxClient *dc);
 
-void
-dropbox_client_start(DropboxClient *dc);
+void dropbox_client_start(DropboxClient *dc);
 
-gboolean
-dropbox_client_is_connected(DropboxClient *dc);
+gboolean dropbox_client_is_connected(DropboxClient *dc);
 
-void
-dropbox_client_force_reconnect(DropboxClient *dc);
+void dropbox_client_force_reconnect(DropboxClient *dc);
 
-void
-dropbox_client_add_on_connect_hook(DropboxClient *dc,
-				   DropboxClientConnectHook dhcch,
-				   gpointer ud);
+void dropbox_client_add_on_connect_hook(DropboxClient *dc,
+                                        DropboxClientConnectHook dhcch,
+                                        gpointer ud);
 
-void
-dropbox_client_add_on_disconnect_hook(DropboxClient *dc,
-				      DropboxClientConnectHook dhcch,
-				      gpointer ud);
+void dropbox_client_add_on_disconnect_hook(DropboxClient *dc,
+                                           DropboxClientConnectHook dhcch,
+                                           gpointer ud);
 
-void
-dropbox_client_add_connection_attempt_hook(DropboxClient *dc,
-					   DropboxClientConnectionAttemptHook dhcch,
-					   gpointer ud);
+void dropbox_client_add_connection_attempt_hook(
+    DropboxClient *dc, DropboxClientConnectionAttemptHook dhcch, gpointer ud);
 
 G_END_DECLS
 

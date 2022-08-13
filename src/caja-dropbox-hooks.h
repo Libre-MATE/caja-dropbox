@@ -47,32 +47,23 @@ typedef struct {
   GHookList onconnect_hooklist;
 } CajaDropboxHookserv;
 
-void
-caja_dropbox_hooks_setup(CajaDropboxHookserv *);
+void caja_dropbox_hooks_setup(CajaDropboxHookserv *);
 
-void
-caja_dropbox_hooks_start(CajaDropboxHookserv *);
+void caja_dropbox_hooks_start(CajaDropboxHookserv *);
 
-gboolean
-caja_dropbox_hooks_is_connected(CajaDropboxHookserv *);
+gboolean caja_dropbox_hooks_is_connected(CajaDropboxHookserv *);
 
-gboolean
-caja_dropbox_hooks_force_reconnect(CajaDropboxHookserv *);
+gboolean caja_dropbox_hooks_force_reconnect(CajaDropboxHookserv *);
 
-void
-caja_dropbox_hooks_add(CajaDropboxHookserv *ndhs,
-			   const gchar *hook_name,
-			   DropboxUpdateHook hook, gpointer ud);
-void
-caja_dropbox_hooks_add_on_disconnect_hook(CajaDropboxHookserv *hookserv,
-					      DropboxHookClientConnectHook dhcch,
-					      gpointer ud);
+void caja_dropbox_hooks_add(CajaDropboxHookserv *ndhs, const gchar *hook_name,
+                            DropboxUpdateHook hook, gpointer ud);
+void caja_dropbox_hooks_add_on_disconnect_hook(
+    CajaDropboxHookserv *hookserv, DropboxHookClientConnectHook dhcch,
+    gpointer ud);
 
-void
-caja_dropbox_hooks_add_on_connect_hook(CajaDropboxHookserv *hookserv,
-					   DropboxHookClientConnectHook dhcch,
-					   gpointer ud);
-
+void caja_dropbox_hooks_add_on_connect_hook(CajaDropboxHookserv *hookserv,
+                                            DropboxHookClientConnectHook dhcch,
+                                            gpointer ud);
 
 G_END_DECLS
 

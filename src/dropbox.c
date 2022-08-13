@@ -31,24 +31,20 @@
 
 static GType type_list[1];
 
-void
-caja_module_initialize (GTypeModule *module) {
-  g_print ("Initializing %s\n", PACKAGE_STRING);
+void caja_module_initialize(GTypeModule *module) {
+  g_print("Initializing %s\n", PACKAGE_STRING);
 
-  caja_dropbox_register_type (module);
+  caja_dropbox_register_type(module);
   type_list[0] = CAJA_TYPE_DROPBOX;
 
   dropbox_use_operation_in_progress_workaround = TRUE;
 }
 
-void
-caja_module_shutdown (void) {
-  g_print ("Shutting down dropbox extension\n");
+void caja_module_shutdown(void) {
+  g_print("Shutting down dropbox extension\n");
 }
 
-void
-caja_module_list_types (const GType **types,
-                            int *num_types) {
+void caja_module_list_types(const GType **types, int *num_types) {
   *types = type_list;
-  *num_types = G_N_ELEMENTS (type_list);
+  *num_types = G_N_ELEMENTS(type_list);
 }

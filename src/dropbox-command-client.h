@@ -24,13 +24,13 @@
 #ifndef DROPBOX_COMMAND_CLIENT_H
 #define DROPBOX_COMMAND_CLIENT_H
 
-#include <libcaja-extension/caja-info-provider.h>
 #include <libcaja-extension/caja-file-info.h>
+#include <libcaja-extension/caja-info-provider.h>
 
 G_BEGIN_DECLS
 
 /* command structs */
-typedef enum {GET_FILE_INFO, GENERAL_COMMAND} CajaDropboxRequestType;
+typedef enum { GET_FILE_INFO, GENERAL_COMMAND } CajaDropboxRequestType;
 
 typedef struct {
   CajaDropboxRequestType request_type;
@@ -77,36 +77,30 @@ gboolean dropbox_command_client_is_connected(DropboxCommandClient *dcc);
 
 void dropbox_command_client_force_reconnect(DropboxCommandClient *dcc);
 
-void
-dropbox_command_client_request(DropboxCommandClient *dcc, DropboxCommand *dc);
+void dropbox_command_client_request(DropboxCommandClient *dcc,
+                                    DropboxCommand *dc);
 
-void
-dropbox_command_client_setup(DropboxCommandClient *dcc);
+void dropbox_command_client_setup(DropboxCommandClient *dcc);
 
-void
-dropbox_command_client_start(DropboxCommandClient *dcc);
+void dropbox_command_client_start(DropboxCommandClient *dcc);
 
 void dropbox_command_client_send_simple_command(DropboxCommandClient *dcc,
-						const char *command);
+                                                const char *command);
 
 void dropbox_command_client_send_command(DropboxCommandClient *dcc,
-					 CajaDropboxCommandResponseHandler h,
-					 gpointer ud,
-					 const char *command, ...);
-void
-dropbox_command_client_add_on_connect_hook(DropboxCommandClient *dcc,
-					   DropboxCommandClientConnectHook dhcch,
-					   gpointer ud);
+                                         CajaDropboxCommandResponseHandler h,
+                                         gpointer ud, const char *command, ...);
+void dropbox_command_client_add_on_connect_hook(
+    DropboxCommandClient *dcc, DropboxCommandClientConnectHook dhcch,
+    gpointer ud);
 
-void
-dropbox_command_client_add_on_disconnect_hook(DropboxCommandClient *dcc,
-					      DropboxCommandClientConnectHook dhcch,
-					      gpointer ud);
+void dropbox_command_client_add_on_disconnect_hook(
+    DropboxCommandClient *dcc, DropboxCommandClientConnectHook dhcch,
+    gpointer ud);
 
-void
-dropbox_command_client_add_connection_attempt_hook(DropboxCommandClient *dcc,
-						   DropboxCommandClientConnectionAttemptHook dhcch,
-						   gpointer ud);
+void dropbox_command_client_add_connection_attempt_hook(
+    DropboxCommandClient *dcc, DropboxCommandClientConnectionAttemptHook dhcch,
+    gpointer ud);
 
 G_END_DECLS
 

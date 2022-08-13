@@ -24,14 +24,13 @@
 #ifndef CAJA_DROPBOX_H
 #define CAJA_DROPBOX_H
 
-#include <glib.h>
 #include <glib-object.h>
-
+#include <glib.h>
 #include <libcaja-extension/caja-info-provider.h>
 
-#include "dropbox-command-client.h"
 #include "caja-dropbox-hooks.h"
 #include "dropbox-client.h"
+#include "dropbox-command-client.h"
 
 G_BEGIN_DECLS
 
@@ -39,10 +38,11 @@ G_BEGIN_DECLS
  * instantiated by caja.  It implements the GInterfaces
  * exported by libcaja. */
 
-#define CAJA_TYPE_DROPBOX	  (caja_dropbox_get_type ())
-#define CAJA_DROPBOX(o)	  (G_TYPE_CHECK_INSTANCE_CAST ((o), CAJA_TYPE_DROPBOX, CajaDropbox))
-#define CAJA_IS_DROPBOX(o)	  (G_TYPE_CHECK_INSTANCE_TYPE ((o), CAJA_TYPE_DROPBOX))
-typedef struct _CajaDropbox      CajaDropbox;
+#define CAJA_TYPE_DROPBOX (caja_dropbox_get_type())
+#define CAJA_DROPBOX(o) \
+  (G_TYPE_CHECK_INSTANCE_CAST((o), CAJA_TYPE_DROPBOX, CajaDropbox))
+#define CAJA_IS_DROPBOX(o) (G_TYPE_CHECK_INSTANCE_TYPE((o), CAJA_TYPE_DROPBOX))
+typedef struct _CajaDropbox CajaDropbox;
 typedef struct _CajaDropboxClass CajaDropboxClass;
 
 struct _CajaDropbox {
@@ -55,11 +55,11 @@ struct _CajaDropbox {
 };
 
 struct _CajaDropboxClass {
-	GObjectClass parent_slot;
+  GObjectClass parent_slot;
 };
 
 GType caja_dropbox_get_type(void);
-void  caja_dropbox_register_type(GTypeModule *module);
+void caja_dropbox_register_type(GTypeModule *module);
 
 extern gboolean dropbox_use_operation_in_progress_workaround;
 

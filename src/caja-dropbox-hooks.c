@@ -21,45 +21,39 @@
  *
  */
 
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/un.h>
+#include "caja-dropbox-hooks.h"
+
 #include <errno.h>
-#include <unistd.h>
 #include <fcntl.h>
-
-#include <string.h>
-
 #include <glib.h>
+#include <string.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <sys/un.h>
+#include <unistd.h>
 
-#include "g-util.h"
 #include "async-io-coroutine.h"
 #include "dropbox-client-util.h"
-#include "caja-dropbox-hooks.h"
+#include "g-util.h"
 
 typedef struct {
   DropboxUpdateHook hook;
   gpointer ud;
 } HookData;
 
-static gboolean
-try_to_connect(CajaDropboxHookserv *hookserv);
+static gboolean try_to_connect(CajaDropboxHookserv *hookserv);
 
-static gboolean
-handle_hook_server_input(GIOChannel *chan,
-			 GIOCondition cond,
-			 CajaDropboxHookserv *hookserv) {
+static gboolean handle_hook_server_input(GIOChannel *chan, GIOCondition cond,
+                                         CajaDropboxHookserv *hookserv) {
   /*debug_enter(); */
 
   /* we have some sweet macros defined that allow us to write this
      async event handler like a microthread yeahh, watch out for context */
   CRBEGIN(hookserv->hhsi.line);
   while (1) {
-    hookserv->hhsi.command_args =
-      g_hash_table_new_full((GHashFunc) g_str_hash,
-			    (GEqualFunc) g_str_equal,
-			    (GDestroyNotify) g_free,
-			    (GDestroyNotify) g_strfreev);
+    hookserv->hhsi.command_args = g_hash_table_new_full(
+        (GHashFunc)g_str_hash, (GEqualFunc)g_str_equal, (GDestroyNotify)g_free,
+        (GDestroyNotify)g_strfreev);
     hookserv->hhsi.numargs = 0;
 
     /* read the command name */
@@ -78,27 +72,25 @@ handle_hook_server_input(GIOChannel *chan,
 
       /* if too many arguments, this connection seems malicious */
       if (hookserv->hhsi.numargs >= 20) {
-	CRHALT;
+        CRHALT;
       }
 
       CRREADLINE(hookserv->hhsi.line, chan, line);
 
       if (strcmp("done", line) == 0) {
-	g_free(line);
-	break;
-      }
-      else {
-	gboolean parse_result;
+        g_free(line);
+        break;
+      } else {
+        gboolean parse_result;
 
-	parse_result =
-	  dropbox_client_util_command_parse_arg(line,
-						hookserv->hhsi.command_args);
-	g_free(line);
+        parse_result = dropbox_client_util_command_parse_arg(
+            line, hookserv->hhsi.command_args);
+        g_free(line);
 
-	if (FALSE == parse_result) {
-	  debug("bad parse");
-	  CRHALT;
-	}
+        if (FALSE == parse_result) {
+          debug("bad parse");
+          CRHALT;
+        }
       }
 
       hookserv->hhsi.numargs += 1;
@@ -106,11 +98,10 @@ handle_hook_server_input(GIOChannel *chan,
 
     {
       HookData *hd;
-      hd = (HookData *)
-	g_hash_table_lookup(hookserv->dispatch_table,
-			    hookserv->hhsi.command_name);
+      hd = (HookData *)g_hash_table_lookup(hookserv->dispatch_table,
+                                           hookserv->hhsi.command_name);
       if (hd != NULL) {
-	(hd->hook)(hookserv->hhsi.command_args, hd->ud);
+        (hd->hook)(hookserv->hhsi.command_args, hd->ud);
       }
     }
 
@@ -122,8 +113,7 @@ handle_hook_server_input(GIOChannel *chan,
   CREND;
 }
 
-static void
-watch_killer(CajaDropboxHookserv *hookserv) {
+static void watch_killer(CajaDropboxHookserv *hookserv) {
   debug("hook client disconnected");
 
   hookserv->connected = FALSE;
@@ -151,8 +141,7 @@ watch_killer(CajaDropboxHookserv *hookserv) {
   try_to_connect(hookserv);
 }
 
-static gboolean
-try_to_connect(CajaDropboxHookserv *hookserv) {
+static gboolean try_to_connect(CajaDropboxHookserv *hookserv) {
   /* create socket */
   hookserv->socket = socket(PF_UNIX, SOCK_STREAM, 0);
 
@@ -176,32 +165,29 @@ try_to_connect(CajaDropboxHookserv *hookserv) {
 
     /* intialize address structure */
     addr.sun_family = AF_UNIX;
-    g_snprintf(addr.sun_path,
-	       sizeof(addr.sun_path),
-	       "%s/.dropbox/iface_socket",
-	       g_get_home_dir());
+    g_snprintf(addr.sun_path, sizeof(addr.sun_path), "%s/.dropbox/iface_socket",
+               g_get_home_dir());
     addr_len = sizeof(addr) - sizeof(addr.sun_path) + strlen(addr.sun_path);
 
     /* if there was an error we have to try again later */
-    if (connect(hookserv->socket, (struct sockaddr *) &addr, addr_len) < 0) {
+    if (connect(hookserv->socket, (struct sockaddr *)&addr, addr_len) < 0) {
       if (errno == EINPROGRESS) {
-	fd_set writers;
-	struct timeval tv = {1, 0};
+        fd_set writers;
+        struct timeval tv = {1, 0};
         FD_ZERO(&writers);
-	FD_SET(hookserv->socket, &writers);
+        FD_SET(hookserv->socket, &writers);
 
-	/* if nothing was ready after 3 seconds, fail out homie */
-	if (select(hookserv->socket+1, NULL, &writers, NULL, &tv) == 0) {
-	  goto FAIL_CLEANUP;
-	}
+        /* if nothing was ready after 3 seconds, fail out homie */
+        if (select(hookserv->socket + 1, NULL, &writers, NULL, &tv) == 0) {
+          goto FAIL_CLEANUP;
+        }
 
-	if (connect(hookserv->socket, (struct sockaddr *) &addr, addr_len) < 0) {
-	  debug("couldn't connect to hook server after 1 second");
-	  goto FAIL_CLEANUP;
-	}
-      }
-      else {
-	goto FAIL_CLEANUP;
+        if (connect(hookserv->socket, (struct sockaddr *)&addr, addr_len) < 0) {
+          debug("couldn't connect to hook server after 1 second");
+          goto FAIL_CLEANUP;
+        }
+      } else {
+        goto FAIL_CLEANUP;
       }
     }
   }
@@ -210,7 +196,7 @@ try_to_connect(CajaDropboxHookserv *hookserv) {
   if (FALSE) {
   FAIL_CLEANUP:
     close(hookserv->socket);
-    g_timeout_add_seconds(1, (GSourceFunc) try_to_connect, hookserv);
+    g_timeout_add_seconds(1, (GSourceFunc)try_to_connect, hookserv);
     return FALSE;
   }
 
@@ -228,10 +214,10 @@ try_to_connect(CajaDropboxHookserv *hookserv) {
 
     flags = g_io_channel_get_flags(hookserv->chan);
     iostat = g_io_channel_set_flags(hookserv->chan, flags | G_IO_FLAG_NONBLOCK,
-				    NULL);
+                                    NULL);
     if (iostat == G_IO_STATUS_ERROR) {
       g_io_channel_unref(hookserv->chan);
-      g_timeout_add_seconds(1, (GSourceFunc) try_to_connect, hookserv);
+      g_timeout_add_seconds(1, (GSourceFunc)try_to_connect, hookserv);
       return FALSE;
     }
   }
@@ -243,10 +229,10 @@ try_to_connect(CajaDropboxHookserv *hookserv) {
   hookserv->hhsi.command_args = NULL;
   hookserv->hhsi.command_name = NULL;
   hookserv->event_source =
-    g_io_add_watch_full(hookserv->chan, G_PRIORITY_DEFAULT,
-			G_IO_IN | G_IO_PRI | G_IO_ERR | G_IO_HUP | G_IO_NVAL,
-			(GIOFunc) handle_hook_server_input, hookserv,
-			(GDestroyNotify) watch_killer);
+      g_io_add_watch_full(hookserv->chan, G_PRIORITY_DEFAULT,
+                          G_IO_IN | G_IO_PRI | G_IO_ERR | G_IO_HUP | G_IO_NVAL,
+                          (GIOFunc)handle_hook_server_input, hookserv,
+                          (GDestroyNotify)watch_killer);
 
   debug("hook client connected");
   hookserv->connected = TRUE;
@@ -271,34 +257,29 @@ gboolean caja_dropbox_hooks_force_reconnect(CajaDropboxHookserv *hookserv) {
 
   if (hookserv->event_source > 0) {
     g_source_remove(hookserv->event_source);
-  }
-  else if (hookserv->event_source == 0) {
+  } else if (hookserv->event_source == 0) {
     debug("event source was zero!!!!!");
   }
 
   return FALSE;
 }
 
-gboolean
-caja_dropbox_hooks_is_connected(CajaDropboxHookserv *hookserv) {
+gboolean caja_dropbox_hooks_is_connected(CajaDropboxHookserv *hookserv) {
   return hookserv->connected;
 }
 
-void
-caja_dropbox_hooks_setup(CajaDropboxHookserv *hookserv) {
-  hookserv->dispatch_table = g_hash_table_new_full((GHashFunc) g_str_hash,
-						   (GEqualFunc) g_str_equal,
-						   g_free, g_free);
+void caja_dropbox_hooks_setup(CajaDropboxHookserv *hookserv) {
+  hookserv->dispatch_table = g_hash_table_new_full(
+      (GHashFunc)g_str_hash, (GEqualFunc)g_str_equal, g_free, g_free);
   hookserv->connected = FALSE;
 
   g_hook_list_init(&(hookserv->ondisconnect_hooklist), sizeof(GHook));
   g_hook_list_init(&(hookserv->onconnect_hooklist), sizeof(GHook));
 }
 
-void
-caja_dropbox_hooks_add_on_disconnect_hook(CajaDropboxHookserv *hookserv,
-					      DropboxHookClientConnectHook dhcch,
-					      gpointer ud) {
+void caja_dropbox_hooks_add_on_disconnect_hook(
+    CajaDropboxHookserv *hookserv, DropboxHookClientConnectHook dhcch,
+    gpointer ud) {
   GHook *newhook;
 
   newhook = g_hook_alloc(&(hookserv->ondisconnect_hooklist));
@@ -308,10 +289,9 @@ caja_dropbox_hooks_add_on_disconnect_hook(CajaDropboxHookserv *hookserv,
   g_hook_append(&(hookserv->ondisconnect_hooklist), newhook);
 }
 
-void
-caja_dropbox_hooks_add_on_connect_hook(CajaDropboxHookserv *hookserv,
-					   DropboxHookClientConnectHook dhcch,
-					   gpointer ud) {
+void caja_dropbox_hooks_add_on_connect_hook(CajaDropboxHookserv *hookserv,
+                                            DropboxHookClientConnectHook dhcch,
+                                            gpointer ud) {
   GHook *newhook;
 
   newhook = g_hook_alloc(&(hookserv->onconnect_hooklist));
@@ -321,9 +301,8 @@ caja_dropbox_hooks_add_on_connect_hook(CajaDropboxHookserv *hookserv,
   g_hook_append(&(hookserv->onconnect_hooklist), newhook);
 }
 
-void caja_dropbox_hooks_add(CajaDropboxHookserv *ndhs,
-				const gchar *hook_name,
-				DropboxUpdateHook hook, gpointer ud) {
+void caja_dropbox_hooks_add(CajaDropboxHookserv *ndhs, const gchar *hook_name,
+                            DropboxUpdateHook hook, gpointer ud) {
   HookData *hd;
   hd = g_new(HookData, 1);
   hd->hook = hook;
@@ -331,7 +310,6 @@ void caja_dropbox_hooks_add(CajaDropboxHookserv *ndhs,
   g_hash_table_insert(ndhs->dispatch_table, g_strdup(hook_name), hd);
 }
 
-void
-caja_dropbox_hooks_start(CajaDropboxHookserv *hookserv) {
+void caja_dropbox_hooks_start(CajaDropboxHookserv *hookserv) {
   try_to_connect(hookserv);
 }
