@@ -7,7 +7,7 @@ if USE_NLS
 		--keyword= --keyword=Name --keyword=GenericName --keyword=Comment --keyword=Keywords \
 		--template $< -d $(top_srcdir)/po -o $@
 else
-	$(AM_V_GEN) sed '/^# Translators/d' < $< > $@
+	$(AM_V_GEN)$(SED) '/^# Translators/d' < $< > $@
 endif
 
 extensiondir = $(datadir)/caja/extensions

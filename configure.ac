@@ -27,6 +27,7 @@ GLIB_REQUIRED=2.50.0
 
 # Used programs
 AC_PROG_CC
+AC_PROG_SED
 LT_INIT
 
 # Check for pkg-config
