@@ -19,7 +19,6 @@ AC_PREREQ(2.60)
 AC_COPYRIGHT([Copyright (C) 2022 Libre MATE])
 AM_INIT_AUTOMAKE([1.11 tar-ustar dist-xz foreign no-dist-gzip silent-rules])
 AC_CONFIG_MACRO_DIR([m4])
-AC_PREFIX_DEFAULT(/usr)
 AC_CONFIG_HEADERS(config.h)
 
 MATE_COMPILE_WARNINGS
