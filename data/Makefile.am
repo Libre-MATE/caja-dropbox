@@ -33,3 +33,5 @@ DISTCLEANFILES = \
 	$(extension_in_files)
 
 SUBDIRS = icons emblems
+
+-include $(top_srcdir)/git.mk
