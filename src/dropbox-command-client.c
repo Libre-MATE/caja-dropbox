@@ -512,7 +512,7 @@ static void end_request(DropboxCommand *dc) {
 static gpointer dropbox_command_client_thread(DropboxCommandClient *dcc) {
   struct sockaddr_un addr;
   socklen_t addr_len;
-  int connection_attempts = 1;
+  guint connection_attempts = 1;
 
   /* intialize address structure */
   addr.sun_family = AF_UNIX;

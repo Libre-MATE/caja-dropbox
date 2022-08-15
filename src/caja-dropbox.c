@@ -474,9 +474,8 @@ static void menu_item_cb(CajaMenuItem *item, CajaDropbox *cvs) {
   dropbox_command_client_request(&(cvs->dc.dcc), (DropboxCommand *)dcac);
 }
 
-static char from_hex(gchar ch) {
-  return isdigit(ch) ? ch - '0' : tolower(ch) - 'a' + 10;
-}
+#define XDIGIT(c) ((c) <= '9' ? (c) - '0' : ((c) & 0x4F) - 'A' + 10)
+#define HEXCHAR(s) ((XDIGIT (s[1]) << 4) + XDIGIT (s[2]))
 
 // decode in --> out, but dont fill more than n chars into out
 // returns len of out if thing went well, -1 if n wasn't big enough
@@ -486,8 +485,9 @@ int GhettoURLDecode(gchar *out, gchar *in, int n) {
 
   for (out_initial = out; out - out_initial < n && *in != '\0'; out++) {
     if (*in == '%') {
-      if ((in[1] != '\0') && (in[2] != '\0')) {
-        *out = from_hex(in[1]) << 4 | from_hex(in[2]);
+      if ((in[1] != '\0') && g_ascii_isxdigit (in[1]) && (in[2] != '\0') &&
+          g_ascii_isxdigit (in[2])) {
+        *out = HEXCHAR(in);
         in += 3;
       } else {
         // Input string isn't well-formed
@@ -610,9 +610,9 @@ static GList *caja_dropbox_get_file_items(CajaMenuProvider *provider,
   /*
    * 1. Convert files to filenames.
    */
-  int file_count = g_list_length(files);
+  guint file_count = g_list_length(files);
 
-  if (file_count < 1) return NULL;
+  if (file_count == 0) return NULL;
 
   gchar **paths = g_new0(gchar *, file_count + 1);
   int i = 0;
