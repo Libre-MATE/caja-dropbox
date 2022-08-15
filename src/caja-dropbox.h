@@ -63,6 +63,8 @@ void caja_dropbox_register_type(GTypeModule *module);
 
 extern gboolean dropbox_use_operation_in_progress_workaround;
 
+gboolean caja_dropbox_finish_file_info_command(DropboxFileInfoCommandResponse *dficr);
+
 G_END_DECLS
 
 #endif

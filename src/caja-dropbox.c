@@ -480,7 +480,7 @@ static void menu_item_cb(CajaMenuItem *item, CajaDropbox *cvs) {
 // decode in --> out, but dont fill more than n chars into out
 // returns len of out if thing went well, -1 if n wasn't big enough
 // can be used in place (whoa!)
-int GhettoURLDecode(gchar *out, gchar *in, int n) {
+static int GhettoURLDecode(gchar *out, gchar *in, int n) {
   char *out_initial;
 
   for (out_initial = out; out - out_initial < n && *in != '\0'; out++) {
@@ -709,7 +709,7 @@ static GList *caja_dropbox_get_file_items(CajaMenuProvider *provider,
   return toret;
 }
 
-gboolean add_emblem_paths(GHashTable *emblem_paths_response) {
+static gboolean add_emblem_paths(GHashTable *emblem_paths_response) {
   /* Only run this on the main loop or you'll cause problems. */
   if (!emblem_paths_response) return FALSE;
 
@@ -729,7 +729,7 @@ gboolean add_emblem_paths(GHashTable *emblem_paths_response) {
   return FALSE;
 }
 
-gboolean remove_emblem_paths(GHashTable *emblem_paths_response) {
+static gboolean remove_emblem_paths(GHashTable *emblem_paths_response) {
   /* Only run this on the main loop or you'll cause problems. */
   if (!emblem_paths_response) return FALSE;
 
@@ -777,7 +777,8 @@ exit:
   return FALSE;
 }
 
-void get_emblem_paths_cb(GHashTable *emblem_paths_response, CajaDropbox *cvs) {
+static void get_emblem_paths_cb(GHashTable *emblem_paths_response,
+                                CajaDropbox *cvs) {
   if (!emblem_paths_response) {
     emblem_paths_response =
         g_hash_table_new((GHashFunc)g_str_hash, (GEqualFunc)g_str_equal);
