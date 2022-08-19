@@ -712,8 +712,8 @@ static gboolean add_emblem_paths(GHashTable *emblem_paths_response) {
   /* Only run this on the main loop or you'll cause problems. */
   if (!emblem_paths_response) return FALSE;
 
-  if (emblem_paths_response && (emblem_paths_list = g_hash_table_lookup(
-                                    emblem_paths_response, "path"))) {
+  if (NULL != (emblem_paths_list = g_hash_table_lookup(emblem_paths_response,
+                                                       "path"))) {
     GtkIconTheme *theme = gtk_icon_theme_get_default();
     int i;
 
