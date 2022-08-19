@@ -298,15 +298,12 @@ static void handle_shell_touch(GHashTable *args, CajaDropbox *cvs) {
   //  debug_enter();
 
   if ((path = g_hash_table_lookup(args, "path")) != NULL && path[0][0] == '/') {
-    CajaFileInfo *file;
-    gchar *filename;
-
-    filename = canonicalize_path(path[0]);
+    gchar *filename = canonicalize_path(path[0]);
     if (filename != NULL) {
+      CajaFileInfo *file;
+
       debug("shell touch for %s", filename);
-
       file = g_hash_table_lookup(cvs->filename2obj, filename);
-
       if (file != NULL) {
         debug("gonna reset %s", filename);
         reset_file(file);
@@ -710,16 +707,16 @@ static GList *caja_dropbox_get_file_items(CajaMenuProvider *provider,
 }
 
 static gboolean add_emblem_paths(GHashTable *emblem_paths_response) {
+  gchar **emblem_paths_list;
+
   /* Only run this on the main loop or you'll cause problems. */
   if (!emblem_paths_response) return FALSE;
 
-  gchar **emblem_paths_list;
-  int i;
-
-  GtkIconTheme *theme = gtk_icon_theme_get_default();
-
   if (emblem_paths_response && (emblem_paths_list = g_hash_table_lookup(
                                     emblem_paths_response, "path"))) {
+    GtkIconTheme *theme = gtk_icon_theme_get_default();
+    int i;
+
     for (i = 0; emblem_paths_list[i] != NULL; i++) {
       if (emblem_paths_list[i][0])
         gtk_icon_theme_append_search_path(theme, emblem_paths_list[i]);
