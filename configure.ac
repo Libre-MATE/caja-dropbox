@@ -14,7 +14,7 @@
 # along with this program; see the file COPYING3.  If not see
 # <http://www.gnu.org/licenses/>.
 
-AC_INIT([caja-dropbox], [1.26.0], [https://github.com/Libre-MATE/caja-dropbox])
+AC_INIT([caja-dropbox], [1.26.0], [https://github.com/Libre-MATE/caja-dropbox], [caja-dropbox], [https://github.com/Libre-MATE/caja-dropbox])
 AC_PREREQ(2.60)
 AC_COPYRIGHT([Copyright (C) 2022 Libre MATE])
 AM_INIT_AUTOMAKE([1.11 tar-ustar dist-xz foreign no-dist-gzip])
