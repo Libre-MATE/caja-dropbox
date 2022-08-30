@@ -42,7 +42,6 @@
 #include "caja-dropbox-hooks.h"
 #include "caja-dropbox.h"
 #include "dropbox-command-client.h"
-#include "g-util.h"
 
 static char *emblems[] = {"dropbox-uptodate", "dropbox-syncing",
                           "dropbox-unsyncable"};
@@ -98,7 +97,7 @@ exit:
 }
 
 static void reset_file(CajaFileInfo *file) {
-  debug("resetting file %p", (void *)file);
+  g_debug("resetting file %p", (void *)file);
   caja_file_info_invalidate_extension_info(file);
 }
 
@@ -120,9 +119,6 @@ static void when_file_dies(CajaDropbox *cvs, CajaFileInfo *address) {
   if (filename == NULL) {
     return;
   }
-
-  /* too chatty */
-  /*  debug("removing %s <-> 0x%p", filename, address); */
 
   g_hash_table_remove(cvs->filename2obj, filename);
   g_hash_table_remove(cvs->obj2filename, address);
@@ -167,7 +163,7 @@ static void changed_cb(CajaFileInfo *file, CajaDropbox *cvs) {
   /* this is a hack, because caja doesn't do this for us, for some reason
      the file's path has changed */
   if (strcmp(filename, filename2) != 0) {
-    debug("shifty old: %s, new %s", filename2, filename);
+    g_debug("shifty old: %s, new %s", filename2, filename);
 
     /* gotta do this first, the call after this frees filename2 */
     g_hash_table_remove(cvs->filename2obj, filename2);
@@ -256,8 +252,6 @@ static CajaOperationResult caja_dropbox_update_file_info(
           }
         }
 
-        /* too chatty */
-        /* debug("adding %s <-> 0x%p", filename, file);*/
         g_object_weak_ref(G_OBJECT(file), (GWeakNotify)when_file_dies, cvs);
         g_hash_table_insert(cvs->filename2obj, g_strdup(filename), file);
         g_hash_table_insert(cvs->obj2filename, file, g_strdup(filename));
@@ -295,17 +289,15 @@ static CajaOperationResult caja_dropbox_update_file_info(
 static void handle_shell_touch(GHashTable *args, CajaDropbox *cvs) {
   gchar **path;
 
-  //  debug_enter();
-
   if ((path = g_hash_table_lookup(args, "path")) != NULL && path[0][0] == '/') {
     gchar *filename = canonicalize_path(path[0]);
     if (filename != NULL) {
       CajaFileInfo *file;
 
-      debug("shell touch for %s", filename);
+      g_debug("shell touch for %s", filename);
       file = g_hash_table_lookup(cvs->filename2obj, filename);
       if (file != NULL) {
-        debug("gonna reset %s", filename);
+        g_debug("gonna reset %s", filename);
         reset_file(file);
       }
       g_free(filename);
@@ -317,7 +309,6 @@ static void handle_shell_touch(GHashTable *args, CajaDropbox *cvs) {
 
 gboolean caja_dropbox_finish_file_info_command(
     DropboxFileInfoCommandResponse *dficr) {
-  // debug_enter();
   CajaOperationResult result = CAJA_OPERATION_FAILED;
 
   if (!dficr->dfic->cancelled) {
@@ -371,15 +362,9 @@ gboolean caja_dropbox_finish_file_info_command(
           emblem_code = 3;
         }
 
-        if (emblem_code > 0) {
-          /*
-            debug("%s to %s", emblems[emblem_code-1],
-            g_filename_from_uri(caja_file_info_get_uri(dficr->dfic->file),
-            NULL, NULL));
-          */
+        if (emblem_code > 0)
           caja_file_info_add_emblem(dficr->dfic->file,
                                     emblems[emblem_code - 1]);
-        }
       }
       result = CAJA_OPERATION_COMPLETE;
     }
@@ -853,7 +838,7 @@ static void caja_dropbox_instance_init(CajaDropbox *cvs) {
       &(cvs->dc), (DropboxClientConnectHook)on_disconnect, cvs);
 
   /* now start the connection */
-  debug("about to start client connection");
+  g_debug("about to start client connection");
   dropbox_client_start(&(cvs->dc));
 
   return;
@@ -862,8 +847,6 @@ static void caja_dropbox_instance_init(CajaDropbox *cvs) {
 static void caja_dropbox_class_init(CajaDropboxClass *class) {}
 
 static void caja_dropbox_class_finalize(CajaDropboxClass *class) {
-  debug("just checking");
-  /* kill threads here? */
 }
 
 GType caja_dropbox_get_type(void) { return dropbox_type; }

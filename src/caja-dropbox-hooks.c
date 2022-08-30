@@ -34,7 +34,6 @@
 
 #include "async-io-coroutine.h"
 #include "dropbox-client-util.h"
-#include "g-util.h"
 
 typedef struct {
   DropboxUpdateHook hook;
@@ -45,8 +44,6 @@ static gboolean try_to_connect(CajaDropboxHookserv *hookserv);
 
 static gboolean handle_hook_server_input(GIOChannel *chan, GIOCondition cond,
                                          CajaDropboxHookserv *hookserv) {
-  /*debug_enter(); */
-
   /* we have some sweet macros defined that allow us to write this
      async event handler like a microthread yeahh, watch out for context */
   CRBEGIN(hookserv->hhsi.line);
@@ -63,8 +60,6 @@ static gboolean handle_hook_server_input(GIOChannel *chan, GIOCondition cond,
       hookserv->hhsi.command_name = dropbox_client_util_desanitize(line);
       g_free(line);
     }
-
-    /*debug("got a hook name: %s", hookserv->hhsi.command_name); */
 
     /* now read each arg line (until a certain limit) until we receive "done" */
     while (1) {
@@ -88,7 +83,7 @@ static gboolean handle_hook_server_input(GIOChannel *chan, GIOCondition cond,
         g_free(line);
 
         if (FALSE == parse_result) {
-          debug("bad parse");
+          g_debug("bad parse");
           CRHALT;
         }
       }
@@ -114,7 +109,7 @@ static gboolean handle_hook_server_input(GIOChannel *chan, GIOCondition cond,
 }
 
 static void watch_killer(CajaDropboxHookserv *hookserv) {
-  debug("hook client disconnected");
+  g_debug("hook client disconnected");
 
   hookserv->connected = FALSE;
 
@@ -183,7 +178,7 @@ static gboolean try_to_connect(CajaDropboxHookserv *hookserv) {
         }
 
         if (connect(hookserv->socket, (struct sockaddr *)&addr, addr_len) < 0) {
-          debug("couldn't connect to hook server after 1 second");
+          g_debug("couldn't connect to hook server after 1 second");
           goto FAIL_CLEANUP;
         }
       } else {
@@ -205,8 +200,6 @@ static gboolean try_to_connect(CajaDropboxHookserv *hookserv) {
   g_io_channel_set_line_term(hookserv->chan, "\n", -1);
   g_io_channel_set_close_on_unref(hookserv->chan, TRUE);
 
-  /*debug("create channel"); */
-
   /* Set non-blocking ;) (again just in case) */
   {
     GIOFlags flags;
@@ -222,8 +215,6 @@ static gboolean try_to_connect(CajaDropboxHookserv *hookserv) {
     }
   }
 
-  /*debug("set non blocking"); */
-
   /* this is fun, async io watcher */
   hookserv->hhsi.line = 0;
   hookserv->hhsi.command_args = NULL;
@@ -234,31 +225,28 @@ static gboolean try_to_connect(CajaDropboxHookserv *hookserv) {
                           (GIOFunc)handle_hook_server_input, hookserv,
                           (GDestroyNotify)watch_killer);
 
-  debug("hook client connected");
+  g_debug("hook client connected");
   hookserv->connected = TRUE;
   g_hook_list_invoke(&(hookserv->onconnect_hooklist), FALSE);
 
-  /*debug("added watch");*/
   return FALSE;
 }
 
 /* should only be called in glib main loop */
 /* returns a gboolean because it is a GSourceFunc */
 gboolean caja_dropbox_hooks_force_reconnect(CajaDropboxHookserv *hookserv) {
-  debug_enter();
-
   if (hookserv->connected == FALSE) {
     return FALSE;
   }
 
-  debug("forcing hook to reconnect");
+  g_debug("forcing hook to reconnect");
 
   g_assert(hookserv->event_source >= 0);
 
   if (hookserv->event_source > 0) {
     g_source_remove(hookserv->event_source);
   } else if (hookserv->event_source == 0) {
-    debug("event source was zero!!!!!");
+    g_debug("event source was zero!!!!!");
   }
 
   return FALSE;

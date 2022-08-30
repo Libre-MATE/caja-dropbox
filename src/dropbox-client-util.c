@@ -59,8 +59,6 @@ gboolean dropbox_client_util_command_parse_arg(const gchar *line,
   argval = g_strsplit(line, "\t", 0);
   len = g_strv_length(argval);
 
-  /*  debug("parsed: (%d) %s", len, line); */
-
   if (len > 1) {
     int i;
     gchar **vals;

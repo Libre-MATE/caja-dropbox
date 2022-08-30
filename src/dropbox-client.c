@@ -28,13 +28,12 @@
 
 #include "caja-dropbox-hooks.h"
 #include "dropbox-command-client.h"
-#include "g-util.h"
 
 static void hook_on_connect(DropboxClient *dc) {
   dc->hook_connect_called = TRUE;
 
   if (dc->command_connect_called) {
-    debug("client connection");
+    g_debug("client connection");
     g_hook_list_invoke(&(dc->onconnect_hooklist), FALSE);
     /* reset flags */
     dc->hook_connect_called = dc->command_connect_called = FALSE;
@@ -45,7 +44,7 @@ static void command_on_connect(DropboxClient *dc) {
   dc->command_connect_called = TRUE;
 
   if (dc->hook_connect_called) {
-    debug("client connection");
+    g_debug("client connection");
     g_hook_list_invoke(&(dc->onconnect_hooklist), FALSE);
     /* reset flags */
     dc->hook_connect_called = dc->command_connect_called = FALSE;
@@ -56,7 +55,7 @@ static void command_on_disconnect(DropboxClient *dc) {
   dc->command_disconnect_called = TRUE;
 
   if (dc->hook_disconnect_called) {
-    debug("client disconnect");
+    g_debug("client disconnect");
     g_hook_list_invoke(&(dc->ondisconnect_hooklist), FALSE);
     /* reset flags */
     dc->hook_disconnect_called = dc->command_disconnect_called = FALSE;
@@ -69,7 +68,7 @@ static void hook_on_disconnect(DropboxClient *dc) {
   dc->hook_disconnect_called = TRUE;
 
   if (dc->command_disconnect_called) {
-    debug("client disconnect");
+    g_debug("client disconnect");
     g_hook_list_invoke(&(dc->ondisconnect_hooklist), FALSE);
     /* reset flags */
     dc->hook_disconnect_called = dc->command_disconnect_called = FALSE;
@@ -85,7 +84,7 @@ gboolean dropbox_client_is_connected(DropboxClient *dc) {
 
 void dropbox_client_force_reconnect(DropboxClient *dc) {
   if (dropbox_client_is_connected(dc) == TRUE) {
-    debug("forcing client to reconnect");
+    g_debug("forcing client to reconnect");
     dropbox_command_client_force_reconnect(&(dc->dcc));
     caja_dropbox_hooks_force_reconnect(&(dc->hookserv));
   }
@@ -144,14 +143,13 @@ void dropbox_client_add_on_connect_hook(DropboxClient *dc,
 /* not thread safe */
 void dropbox_client_add_connection_attempt_hook(
     DropboxClient *dc, DropboxClientConnectionAttemptHook dhcch, gpointer ud) {
-  debug("shouldn't be here...");
-
+  g_debug("shouldn't be here...");
   dropbox_command_client_add_connection_attempt_hook(&(dc->dcc), dhcch, ud);
 }
 
 /* should only be called once on initialization */
 void dropbox_client_start(DropboxClient *dc) {
-  debug("starting connections");
+  g_debug("starting connections");
   caja_dropbox_hooks_start(&(dc->hookserv));
   dropbox_command_client_start(&(dc->dcc));
 }

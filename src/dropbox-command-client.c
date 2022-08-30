@@ -37,7 +37,6 @@
 #include "caja-dropbox-hooks.h"
 #include "caja-dropbox.h"
 #include "dropbox-client-util.h"
-#include "g-util.h"
 
 /* TODO: make this asynchronous ;) */
 
@@ -324,7 +323,7 @@ static void do_file_info_command(GIOChannel *chan, DropboxFileInfoCommand *dfic,
       g_free(filename_un);
       if (filename == NULL) {
         /* oooh, filename wasn't correctly encoded. mark as  */
-        debug("file wasn't correctly encoded %s", filename_un);
+        g_debug("file wasn't correctly encoded %s", filename_un);
       }
     }
   }
@@ -542,7 +541,7 @@ static gpointer dropbox_command_client_thread(DropboxCommandClient *dcc) {
                            sizeof(struct timeval)) ||
             0 > setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO, &tv,
                            sizeof(struct timeval))) {
-          /* debug("setsockopt failed"); */
+          g_debug("setsockopt failed");
           break;
         }
       }
@@ -551,7 +550,7 @@ static gpointer dropbox_command_client_thread(DropboxCommandClient *dcc) {
       {
         if ((flags = fcntl(sock, F_GETFL, 0)) < 0 ||
             fcntl(sock, F_SETFL, flags | O_NONBLOCK) < 0) {
-          /* debug("fcntl failed"); */
+          g_debug("fcntl failed");
           break;
         }
       }
@@ -567,26 +566,25 @@ static gpointer dropbox_command_client_thread(DropboxCommandClient *dcc) {
 
           /* if nothing was ready after 3 seconds, fail out homie */
           if (select(sock + 1, NULL, &writers, NULL, &tv) == 0) {
-            /* debug("connection timeout"); */
+            g_debug("connection timeout");
             break;
           }
 
           if (connect(sock, (struct sockaddr *)&addr, addr_len) < 0) {
-            /*	    debug("couldn't connect to command server after 1 second");
-             */
+            g_debug("couldn't connect to command server after 1 second");
             break;
           }
         }
         /* errno != EINPROGRESS */
         else {
-          /*	  debug("bad connection"); */
+          g_debug("bad connection");
           break;
         }
       }
 
       /* set back to blocking */
       if (fcntl(sock, F_SETFL, flags) < 0) {
-        /* debug("fcntl2 failed"); */
+        g_debug("fcntl2 failed");
         break;
       }
 
@@ -609,7 +607,7 @@ static gpointer dropbox_command_client_thread(DropboxCommandClient *dcc) {
     }
 
     /* connected */
-    debug("command client connected");
+    g_debug("command client connected");
 
     chan = g_io_channel_unix_new(sock);
     g_io_channel_set_close_on_unref(chan, TRUE);
@@ -644,17 +642,17 @@ static gpointer dropbox_command_client_thread(DropboxCommandClient *dcc) {
       /* this pointer should be unique */
       if ((gpointer(*)(DropboxCommandClient * data))
               dc == &dropbox_command_client_thread) {
-        debug("got a reset request");
+        g_debug("got a reset request");
         goto BADCONNECTION;
       }
 
       switch (dc->request_type) {
         case GET_FILE_INFO: {
-          debug("doing file info command");
+          g_debug("doing file info command");
           do_file_info_command(chan, (DropboxFileInfoCommand *)dc, &gerr);
         } break;
         case GENERAL_COMMAND: {
-          debug("doing general command");
+          g_debug("doing general command");
           do_general_command(chan, (DropboxGeneralCommand *)dc, &gerr);
         } break;
         default:
@@ -662,14 +660,14 @@ static gpointer dropbox_command_client_thread(DropboxCommandClient *dcc) {
           break;
       }
 
-      debug("done.");
+      g_debug("done.");
 
       if (gerr != NULL) {
-        //	debug("COMMAND ERROR*****************************");
+        g_debug("COMMAND ERROR*****************************");
         /* mark this request as never to be completed */
         end_request(dc);
 
-        debug("command error: %s", gerr->message);
+        g_debug("command error: %s", gerr->message);
 
         g_error_free(gerr);
       BADCONNECTION:
@@ -710,7 +708,7 @@ gboolean dropbox_command_client_is_connected(DropboxCommandClient *dcc) {
 /* thread safe */
 void dropbox_command_client_force_reconnect(DropboxCommandClient *dcc) {
   if (dropbox_command_client_is_connected(dcc) == TRUE) {
-    debug("forcing command to reconnect");
+    g_debug("forcing command to reconnect");
     dropbox_command_client_request(
         dcc, (DropboxCommand *)&dropbox_command_client_thread);
   }
@@ -762,7 +760,7 @@ void dropbox_command_client_add_connection_attempt_hook(
     gpointer ud) {
   DropboxCommandClientConnectionAttempt *newhook;
 
-  debug("shouldn't be here...");
+  g_debug("shouldn't be here...");
 
   newhook = g_new(DropboxCommandClientConnectionAttempt, 1);
   newhook->h = dhcch;
@@ -774,7 +772,7 @@ void dropbox_command_client_add_connection_attempt_hook(
 /* should only be called once on initialization */
 void dropbox_command_client_start(DropboxCommandClient *dcc) {
   /* setup the connect to the command server */
-  debug("starting command thread");
+  g_debug("starting command thread");
   g_thread_new(NULL, (GThreadFunc)dropbox_command_client_thread, dcc);
 }
 
